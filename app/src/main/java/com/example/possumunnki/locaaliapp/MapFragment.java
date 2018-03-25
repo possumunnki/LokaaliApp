@@ -19,6 +19,7 @@ public class MapFragment extends Fragment {
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+
     }
 
     @Override
