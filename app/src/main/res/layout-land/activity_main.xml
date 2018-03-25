@@ -3,18 +3,20 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <fragment
         android:id="@+id/menu_fragment"
         android:name="com.example.possumunnki.locaaliapp.MenuFragment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        />
-    <fragment
-        android:id="@+id/map_fragment"
-        android:name="com.example.possumunnki.locaaliapp.MapFragment"
+        android:layout_weight="1" />
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="2"
-        />
+        android:id="@+id/map"
+        tools:context=".MainActivity"
+        android:name="com.google.android.gms.maps.SupportMapFragment" />
 </LinearLayout>

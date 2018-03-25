@@ -6,12 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.example.possumunnki.locaaliapp.MainActivity">
-    <Button
-        android:id="@+id/fetch"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Fetch Location"
-        android:onClick="clicked"/>
+
     <fragment
         android:id="@+id/menu_fragment"
         android:name="com.example.possumunnki.locaaliapp.MenuFragment"
