@@ -26,44 +26,38 @@ import com.google.android.gms.maps.model.MarkerOptions;
  * @version 1.0
  * @since 2017-05-12
  */
-/*
-public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCallback {
+
+public class GoogleMapControl implements OnMapReadyCallback {
     private boolean locationPermission = false;
     private GoogleMap mMap;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-
+    private AppCompatActivity host;
+    public GoogleMapControl(AppCompatActivity host) {
+        this.host = host;
     }
 
-
+    public void initGoogleMap() {
+        SupportMapFragment mapFragment = (SupportMapFragment) host.getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+        askLocationPermission();
+        if(locationPermission) {
+            fetchLocation();
+        }
+    }
 
     public void askLocationPermission() {
-        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        int permissionCheck = ContextCompat.checkSelfPermission(host, Manifest.permission.ACCESS_FINE_LOCATION);
         if(permissionCheck == PackageManager.PERMISSION_DENIED) {
             String[] listOfPermissions = {Manifest.permission.ACCESS_FINE_LOCATION};
-            ActivityCompat.requestPermissions(this,listOfPermissions, 1);
+            ActivityCompat.requestPermissions(host,listOfPermissions, 1);
         } else {
             locationPermission = true;
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        if(requestCode == 1) {
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                locationPermission = true;
-            }
-        }
-    }
+
 
     public void fetchLocation() {
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) host.getSystemService(Context.LOCATION_SERVICE);
         try {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     0,
@@ -86,29 +80,39 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(gps, 12));
         }
     }
+
+    public boolean isLocationPermission() {
+        return locationPermission;
+    }
+
+    public void setLocationPermission(boolean locationPermission) {
+        this.locationPermission = locationPermission;
+    }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        class Listener implements LocationListener {
+        new Listener();
+    }
+    class Listener implements LocationListener {
 
-            @Override
-            public void onLocationChanged(Location location) {
-                drawMarker(location);
-            }
+        @Override
+        public void onLocationChanged(Location location) {
+            drawMarker(location);
+        }
 
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
 
-            }
+        }
 
-            @Override
-            public void onProviderEnabled(String s) {
+        @Override
+        public void onProviderEnabled(String s) {
 
-            }
+        }
 
-            @Override
-            public void onProviderDisabled(String s) {
+        @Override
+        public void onProviderDisabled(String s) {
 
-            }
         }
     }
-}*/
+}
