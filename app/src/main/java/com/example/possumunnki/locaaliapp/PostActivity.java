@@ -54,12 +54,11 @@ public class PostActivity extends AppCompatActivity {
                 HttpPostAsyncTask task = new HttpPostAsyncTask(map, this);
 
                 task.execute("http://10.0.2.2:8080/products");
-                break;
-            case R.id.cancel:
-
+                finish();
                 break;
         }
     }
+
 
     public class HttpPostAsyncTask extends AsyncTask<String, String, Void> {
         //JSON body of the post

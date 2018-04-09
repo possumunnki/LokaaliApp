@@ -13,7 +13,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -22,6 +26,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
@@ -32,10 +37,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
                                                 GoogleMap.OnMyLocationButtonClickListener,
-                                                GoogleMap.OnMyLocationClickListener {
+                                                GoogleMap.OnMyLocationClickListener,
+                                                GoogleMap.OnInfoWindowClickListener {
     private final String TAG = "MainActivity";
     private boolean locationPermission = false;
     private JSONArray productPosts;
@@ -44,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private UiSettings mUIsettings;
     private double currentLongitude;
     private double currentLatitude;
+    private ArrayList<Marker> markers;
+
+    private EditText search;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +61,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
+        markers = new ArrayList<>();
         askLocationPermission();
         if(locationPermission) {
             fetchLocation();
         }
 
+        search = (EditText) findViewById(R.id.search);
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterMarkers(s);
+                Debug.print(TAG, "onTextChanged", s.toString(), 2);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        new HttpGetAsyncTask().execute("http://10.0.2.2:8080/products");
     }
 
     public void clicked(View v) {
@@ -71,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
     }
+
+
 
     public void askLocationPermission() {
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -115,12 +152,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void drawMarker(String title, double longitude, double latitude) {
-        LatLng gps = new LatLng(latitude, longitude);
-        mMap.addMarker(new MarkerOptions()
-                .position(gps)
-                .title(title));
+    public void filterMarkers(CharSequence filter) {
+        //converts to lowercase
+        String filterLow = filter.toString().toLowerCase();
+        for(Marker marker: markers) {
+            // converts also title so that user don't have to mind low and upper letter
+            String titleLow = marker.getTitle().toLowerCase();
+            if(titleLow.contains(filterLow)) {
+                marker.setVisible(true);
+            } else {
+                marker.setVisible(false);
+            }
+
+        }
     }
+
+    public void drawMarker(String title, String description, double longitude, double latitude) {
+        LatLng gps = new LatLng(latitude, longitude);
+        markers.add(mMap.addMarker(new MarkerOptions()
+                .position(gps)
+                .title(title)
+                .snippet(description)));
+
+    }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -128,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setMyLocationEnabled(true);
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
-
+        mMap.setOnInfoWindowClickListener(this);
 
         mUIsettings = mMap.getUiSettings();
         // enables zoom buttons
@@ -137,6 +192,35 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         new HttpGetAsyncTask().execute("http://10.0.2.2:8080/products");
         zoomToTampere();
         Debug.print(TAG, "onMapReady()", "WE are on map ready", 1);
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Toast.makeText(this, "Info window clicked",
+                Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "" + findFromArray(marker));
+        Intent intent = new Intent(this, ProductInformationActivity.class);
+        try {
+            JSONObject jsonObject = productPosts.getJSONObject(findFromArray(marker));
+            String productTitle = jsonObject.getString("title");
+            String productDescription = jsonObject.getString("description");
+            intent.putExtra("productTitle", productTitle);
+            intent.putExtra("productDescription", productDescription);
+            startActivity(intent);
+        } catch (JSONException e) {
+            System.out.println(e);
+        }
+    }
+
+    public int findFromArray(Marker m) {
+        int result = -1; // return this is not found
+        for(int i = 0; i < markers.size(); i++) {
+            if(markers.get(i).equals(m)) {
+                result = i;
+                break;
+            }
+        }
+        return result;
     }
 
     @Override
@@ -234,9 +318,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 for(int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     String title = jsonObject.getString("title");
+                    String description = jsonObject.getString("description");
                     double longitude = jsonObject.getDouble("longitude");
                     double latitude = jsonObject.getDouble("latitude");
-                    drawMarker(title, longitude, latitude);
+                    drawMarker(title, description, longitude, latitude);
                     Debug.print(TAG, "drawPostsOnMap", "long" + longitude + " lat" + latitude, 2);
                 }
             } catch (JSONException e) {
