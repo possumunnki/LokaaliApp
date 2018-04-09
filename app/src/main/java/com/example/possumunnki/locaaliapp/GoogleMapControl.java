@@ -34,7 +34,7 @@ public class GoogleMapControl implements OnMapReadyCallback {
     public GoogleMapControl(AppCompatActivity host) {
         this.host = host;
     }
-
+    
     public void initGoogleMap() {
         SupportMapFragment mapFragment = (SupportMapFragment) host.getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);

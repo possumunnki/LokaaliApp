@@ -167,12 +167,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void drawMarker(String title, String description, double longitude, double latitude) {
+    public void drawMarker(String title, String description, double longitude, double latitude, JSONObject info) {
         LatLng gps = new LatLng(latitude, longitude);
-        markers.add(mMap.addMarker(new MarkerOptions()
+
+        CustomInfoWindowGoogleMap customInfoWindow = new CustomInfoWindowGoogleMap(this);
+        mMap.setInfoWindowAdapter(customInfoWindow);
+
+        Marker marker = mMap.addMarker(new MarkerOptions()
                 .position(gps)
                 .title(title)
-                .snippet(description)));
+                .snippet(description));
+        markers.add(marker);
+        marker.setTag(info);
+        marker.showInfoWindow();
+
 
     }
 
@@ -321,7 +329,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     String description = jsonObject.getString("description");
                     double longitude = jsonObject.getDouble("longitude");
                     double latitude = jsonObject.getDouble("latitude");
-                    drawMarker(title, description, longitude, latitude);
+
+                    drawMarker(title, description, longitude, latitude, jsonObject);
                     Debug.print(TAG, "drawPostsOnMap", "long" + longitude + " lat" + latitude, 2);
                 }
             } catch (JSONException e) {
