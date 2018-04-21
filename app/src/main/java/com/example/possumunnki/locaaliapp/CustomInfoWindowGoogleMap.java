@@ -38,11 +38,8 @@ public class CustomInfoWindowGoogleMap implements GoogleMap.InfoWindowAdapter {
         TextView name = view.findViewById(R.id.name);
         TextView details = view.findViewById(R.id.details);
 
-
         name.setText(marker.getTitle());
         details.setText(marker.getSnippet());
-
-        JSONObject info = (JSONObject) marker.getTag();
 
 
         return view;

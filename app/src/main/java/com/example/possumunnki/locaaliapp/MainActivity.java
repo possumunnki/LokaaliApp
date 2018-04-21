@@ -25,6 +25,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -45,14 +46,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                 GoogleMap.OnInfoWindowClickListener {
     private final String TAG = "MainActivity";
     private boolean locationPermission = false;
-    private JSONArray productPosts;
     private GoogleMap mMap;
     private Location currentLocation;
     private UiSettings mUIsettings;
     private double currentLongitude;
     private double currentLatitude;
     private ArrayList<Marker> markers;
-
+    private static ArrayList<ProductPost> productPosts;
     private EditText search;
 
     @Override
@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         markers = new ArrayList<>();
+        productPosts = new ArrayList<>();
+
         askLocationPermission();
         if(locationPermission) {
             fetchLocation();
@@ -92,6 +94,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onResume() {
         super.onResume();
         new HttpGetAsyncTask().execute("http://10.0.2.2:8080/products");
+        if(postHere != null) {
+            postHere.remove();
+        }
+
     }
 
     public void clicked(View v) {
@@ -104,9 +110,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 startActivity(intent);
                 break;
         }
-
     }
-
 
 
     public void askLocationPermission() {
@@ -116,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             ActivityCompat.requestPermissions(this,listOfPermissions, 1);
         } else {
             locationPermission = true;
-
         }
     }
 
@@ -167,7 +170,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void drawMarker(String title, String description, double longitude, double latitude, JSONObject info) {
+
+    public void drawMarkers(ArrayList<ProductPost> posts) {
+        //Debug.print(TAG, "drawMarkers", "" + posts.get(0).getTitle(), 2);
+        for(int i = 0; i < posts.size(); i++) {
+            Debug.print(TAG, "drawMarkers", "" + posts.get(i).getTitle(), 2);
+            drawMarker(posts.get(i));
+        }
+    }
+
+    public void drawMarker(ProductPost post) {
+        int id = post.getId();
+        String title = post.getTitle();
+        String description = post.getDescription();
+        double longitude = post.getLongitude();
+        double latitude = post.getLatitude();
+
+        Debug.print(TAG, "drawMarker", "Title: " + title, 2);
         LatLng gps = new LatLng(latitude, longitude);
 
         CustomInfoWindowGoogleMap customInfoWindow = new CustomInfoWindowGoogleMap(this);
@@ -176,14 +195,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Marker marker = mMap.addMarker(new MarkerOptions()
                 .position(gps)
                 .title(title)
-                .snippet(description));
+                .snippet(description)
+                .draggable(true));
         markers.add(marker);
-        marker.setTag(info);
-        marker.showInfoWindow();
+        post.setMarker(marker);
+        marker.setTag(id);
 
 
     }
 
+    public void drawPostPlaceMarker(LatLng gps) {
+        postHere = mMap.addMarker(new MarkerOptions()
+                .position(gps)
+                .title("Post Here!")
+                .snippet("Your post will be posted here")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+        postHere.setTag("post");
+        postHere.showInfoWindow();
+    }
+
+    private Marker postHere;
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -192,6 +223,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
         mMap.setOnInfoWindowClickListener(this);
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if(postHere != null) {
+                    postHere.remove();
+                }
+                currentLongitude = latLng.longitude;
+                currentLatitude = latLng.latitude;
+                drawPostPlaceMarker(latLng);
+
+            }
+        });
 
         mUIsettings = mMap.getUiSettings();
         // enables zoom buttons
@@ -206,18 +249,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onInfoWindowClick(Marker marker) {
         Toast.makeText(this, "Info window clicked",
                 Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "" + findFromArray(marker));
-        Intent intent = new Intent(this, ProductInformationActivity.class);
-        try {
-            JSONObject jsonObject = productPosts.getJSONObject(findFromArray(marker));
-            String productTitle = jsonObject.getString("title");
-            String productDescription = jsonObject.getString("description");
-            intent.putExtra("productTitle", productTitle);
-            intent.putExtra("productDescription", productDescription);
-            startActivity(intent);
-        } catch (JSONException e) {
-            System.out.println(e);
+
+        if(marker.getTag() != null) {
+            if(marker.getTag().toString().equals("post")) {
+                Intent intent = new Intent(this, PostActivity.class);
+                intent.putExtra("currentLongitude", currentLongitude);
+                intent.putExtra("currentLatitude", currentLatitude);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(this, ProductInformationActivity.class);
+                ProductPost post = productPosts.get((int)marker.getTag());
+                String productTitle = post.getTitle();
+                String productDescription = post.getDescription();
+                intent.putExtra("productTitle", productTitle);
+                intent.putExtra("productDescription", productDescription);
+                startActivity(intent);
+            }
+
         }
+
     }
 
     public int findFromArray(Marker m) {
@@ -247,9 +297,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         public void onLocationChanged(Location location) {
             currentLocation = location;
-            currentLatitude = location.getLatitude();
-            currentLongitude = location.getLongitude();
-            Debug.print(TAG, "onLocationChanged", "we are onLocationChanged", 2);
+
         }
 
         @Override
@@ -297,8 +345,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     stringBuilder.append(inputLine);
                     Debug.print(TAG, "doInBackground",inputLine, 3);
                 }
-                productPosts = new JSONArray(stringBuilder.toString());
-                publishProgress(productPosts);
+                JSONArray posts = new JSONArray(stringBuilder.toString());
+                publishProgress(posts);
                 //Close InputStream and Buffered reader
                 reader.close();
                 streamReader.close();
@@ -314,30 +362,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         protected void onProgressUpdate(JSONArray... jsonArrays) {
-            drawPostsOnMap(jsonArrays[0]);
+            convertToProductPosts(jsonArrays[0]);
         }
 
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
         }
 
-        public void drawPostsOnMap(JSONArray jsonArray) {
+        public void convertToProductPosts(JSONArray jsonArray) {
             try {
                 for(int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                    int id = jsonObject.getInt("id");
                     String title = jsonObject.getString("title");
                     String description = jsonObject.getString("description");
                     double longitude = jsonObject.getDouble("longitude");
                     double latitude = jsonObject.getDouble("latitude");
 
-                    drawMarker(title, description, longitude, latitude, jsonObject);
-                    Debug.print(TAG, "drawPostsOnMap", "long" + longitude + " lat" + latitude, 2);
+                    productPosts.add(new ProductPost(id, title, description, latitude, longitude));
+                    Debug.print(TAG, "convertToProductPosts", "long" + longitude + " lat" + latitude, 2);
                 }
+                drawMarkers(productPosts);
             } catch (JSONException e) {
-                Debug.print(TAG, "drawPostsOnMap", e.toString(), 1);
+                Debug.print(TAG, "convertToProductPosts", e.toString(), 1);
             }
 
         }
     }
-
 }
