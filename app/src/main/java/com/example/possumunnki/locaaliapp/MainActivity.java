@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private UiSettings mUIsettings;
     private double currentLongitude;
     private double currentLatitude;
-    private ArrayList<Marker> markers;
+
     private static ArrayList<ProductPost> productPosts;
     private EditText search;
 
@@ -61,9 +61,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        markers = new ArrayList<>();
-        productPosts = new ArrayList<>();
 
+        productPosts = new ArrayList<>();
+        Long tsLong = System.currentTimeMillis()/1000;
+        String ts = tsLong.toString();
+        Debug.print(TAG, "onCreate", "" + ts, 1);
         askLocationPermission();
         if(locationPermission) {
             fetchLocation();
@@ -102,13 +104,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void clicked(View v) {
         switch (v.getId()) {
-            case R.id.newPost:
+            /*case R.id.newPost:
                 Debug.print(TAG, "clicked()", "post CLICK", 2);
                 Intent intent = new Intent(this, PostActivity.class);
                 intent.putExtra("currentLongitude", currentLongitude);
                 intent.putExtra("currentLatitude", currentLatitude);
                 startActivity(intent);
-                break;
+                break;*/
         }
     }
 
@@ -158,13 +160,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void filterMarkers(CharSequence filter) {
         //converts to lowercase
         String filterLow = filter.toString().toLowerCase();
-        for(Marker marker: markers) {
+        for(ProductPost post: productPosts) {
             // converts also title so that user don't have to mind low and upper letter
-            String titleLow = marker.getTitle().toLowerCase();
+            String titleLow = post.getTitle().toLowerCase();
             if(titleLow.contains(filterLow)) {
-                marker.setVisible(true);
+                post.getMarker().setVisible(true);
             } else {
-                marker.setVisible(false);
+                post.getMarker().setVisible(false);
             }
 
         }
@@ -197,9 +199,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .title(title)
                 .snippet(description)
                 .draggable(true));
-        markers.add(marker);
         post.setMarker(marker);
-        marker.setTag(id);
+        marker.setTag(post);
 
 
     }
@@ -258,11 +259,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 startActivity(intent);
             } else {
                 Intent intent = new Intent(this, ProductInformationActivity.class);
-                ProductPost post = productPosts.get((int)marker.getTag());
-                String productTitle = post.getTitle();
-                String productDescription = post.getDescription();
-                intent.putExtra("productTitle", productTitle);
-                intent.putExtra("productDescription", productDescription);
+                ProductPost post = (ProductPost)marker.getTag();
+                intent.putExtra("productTitle", post.getTitle());
+                intent.putExtra("productDescription", post.getDescription());
+                intent.putExtra("amount", post.getAmount());
+                intent.putExtra("price", post.getPrice());
+                intent.putExtra("postedDate", post.getPostedTime());
                 startActivity(intent);
             }
 
@@ -270,16 +272,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    public int findFromArray(Marker m) {
-        int result = -1; // return this is not found
-        for(int i = 0; i < markers.size(); i++) {
-            if(markers.get(i).equals(m)) {
-                result = i;
-                break;
-            }
-        }
-        return result;
-    }
 
     @Override
     public void onMyLocationClick(@NonNull Location location) {
@@ -379,8 +371,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     String description = jsonObject.getString("description");
                     double longitude = jsonObject.getDouble("longitude");
                     double latitude = jsonObject.getDouble("latitude");
-
-                    productPosts.add(new ProductPost(id, title, description, latitude, longitude));
+                    long postedTime = jsonObject.getLong("timePosted");
+                    double price = jsonObject.getDouble("price");
+                    int amount = jsonObject.getInt("maxAmount");
+                    productPosts.add(new ProductPost(id, title, description, latitude, longitude,postedTime, price, amount));
                     Debug.print(TAG, "convertToProductPosts", "long" + longitude + " lat" + latitude, 2);
                 }
                 drawMarkers(productPosts);

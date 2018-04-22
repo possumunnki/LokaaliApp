@@ -24,6 +24,8 @@ public class PostActivity extends AppCompatActivity {
     private final String TAG = "PostActivity";
     private EditText title;
     private EditText description;
+    private EditText price;
+    private EditText amount;
     private double latitude;
     private double longitude;
     @Override
@@ -32,6 +34,8 @@ public class PostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post);
         title = (EditText) findViewById(R.id.title);
         description = (EditText) findViewById(R.id.description);
+        price = (EditText) findViewById(R.id.price);
+        amount = (EditText) findViewById(R.id.amount);
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
@@ -43,22 +47,51 @@ public class PostActivity extends AppCompatActivity {
     public void clicked(View v) {
         switch (v.getId()) {
             case R.id.post:
-                Map<String,Object> map = new HashMap<>();
-                map.put("longitude", longitude);
-                map.put("latitude", latitude);
-                map.put("title", title.getText().toString());
-                map.put("description", description.getText().toString());
-
-                Debug.print(TAG, "clicked", "longitude" + longitude + " latitude" + latitude, 2);
-
-                HttpPostAsyncTask task = new HttpPostAsyncTask(map, this);
-
-                task.execute("http://10.0.2.2:8080/products");
-                finish();
+                if(checkInputs()){
+                    postProduct();
+                    finish();
+                }
                 break;
         }
     }
 
+    public boolean checkInputs() {
+        boolean result = true;
+
+        if(title.getText().toString().trim().matches("")) {
+            Toast.makeText(this, "Title must be filled!", Toast.LENGTH_SHORT).show();
+            result = false;
+        } else if(description.getText().toString().trim().matches("")) {
+            Toast.makeText(this, "´Description must be filled!", Toast.LENGTH_SHORT).show();
+            result = false;
+        } else if(price.getText().toString().trim().matches("")) {
+            Toast.makeText(this, "Price must be defined!", Toast.LENGTH_SHORT).show();
+            result = false;
+        } else if(amount.getText().toString().matches("")) {
+            Toast.makeText(this, "Amount must be defined!", Toast.LENGTH_SHORT).show();
+            result = false;
+        }
+        return result;
+    }
+
+
+    public void postProduct() {
+        Map<String,Object> map = new HashMap<>();
+        map.put("longitude", longitude);
+        map.put("latitude", latitude);
+        map.put("title", title.getText().toString());
+        map.put("description", description.getText().toString());
+        map.put("price", Double.parseDouble(price.getText().toString()));
+        map.put("maxAmount", Integer.parseInt(amount.getText().toString()));
+        map.put("timePosted", System.currentTimeMillis());
+
+
+        Debug.print(TAG, "clicked", "longitude" + longitude + " latitude" + latitude, 2);
+
+        HttpPostAsyncTask task = new HttpPostAsyncTask(map, this);
+
+        task.execute("http://10.0.2.2:8080/products");
+    }
 
     public class HttpPostAsyncTask extends AsyncTask<String, String, Void> {
         //JSON body of the post

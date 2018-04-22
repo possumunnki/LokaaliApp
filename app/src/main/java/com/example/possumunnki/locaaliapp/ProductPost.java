@@ -16,6 +16,9 @@ public class ProductPost {
     private String description;
     private double latitude;
     private double longitude;
+    private long postedTime;
+    private double price;
+    private int amount;
     private Marker marker;
 
     public ProductPost(int id, String title, String description, double latitude, double longitude) {
@@ -24,6 +27,41 @@ public class ProductPost {
         this.description = description;
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public ProductPost(int id, String title, String description, double latitude, double longitude, long postedTime, double price, int amount) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.postedTime = postedTime;
+        this.price = price;
+        this.amount = amount;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
+
+    public long getPostedTime() {
+        return postedTime;
+    }
+
+    public void setPostedTime(long postedTime) {
+        this.postedTime = postedTime;
     }
 
     public int getId() {

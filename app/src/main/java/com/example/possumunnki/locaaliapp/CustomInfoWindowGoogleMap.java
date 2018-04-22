@@ -11,6 +11,9 @@ import com.google.android.gms.maps.model.Marker;
 
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * The HelloWorld program implements an application that
  * simply displays "Hello World!" to the standard output.
@@ -20,10 +23,12 @@ import org.json.JSONObject;
  * @since 2017-05-12
  */
 public class CustomInfoWindowGoogleMap implements GoogleMap.InfoWindowAdapter {
+    private final String TAG = "CustomInfoWindowGoogleMap";
     private Context context;
-
+    private SimpleDateFormat simpleDateFormat;
     public CustomInfoWindowGoogleMap(Context context) {
         this.context = context;
+        simpleDateFormat = new SimpleDateFormat("MMM/dd/yyyy HH:mm");
     }
     @Override
     public View getInfoWindow(Marker marker) {
@@ -37,9 +42,22 @@ public class CustomInfoWindowGoogleMap implements GoogleMap.InfoWindowAdapter {
 
         TextView name = view.findViewById(R.id.name);
         TextView details = view.findViewById(R.id.details);
+        TextView postedDate = view.findViewById(R.id.postedDate);
+        if(marker.getTag().toString().equals("post")) {
+            name.setText(marker.getTitle());
+            details.setText(marker.getSnippet());
+        } else {
+            ProductPost post = (ProductPost) marker.getTag();
+            name.setText(post.getTitle());
+            details.setText(post.getDescription());
 
-        name.setText(marker.getTitle());
-        details.setText(marker.getSnippet());
+            Debug.print(TAG, "getInfoContains", "Jotain", 2);
+            Long postTime = post.getPostedTime();
+            Date date = new Date(postTime);
+            postedDate.setText(simpleDateFormat.format(date));
+        }
+
+
 
 
         return view;

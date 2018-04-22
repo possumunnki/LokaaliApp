@@ -12,11 +12,15 @@ public class ProductPost {
     private long id;
 
     private double latitude;
-
     private double longitude;
 
     private String title;
     private String description;
+    //!!!!uuutta
+    private double price;
+    private int maxAmount;
+
+    private long timePosted;
 
     public ProductPost() {
     }
@@ -27,6 +31,50 @@ public class ProductPost {
         this.longitude = longitude;
         this.title = title;
         this.description = description;
+    }
+
+    public ProductPost(long id, double latitude, double longitude, String title, String description, long timePosted) {
+        this.id = id;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.title = title;
+        this.description = description;
+        this.timePosted = timePosted;
+    }
+
+    public ProductPost(long id, double latitude, double longitude, String title, String description, double price, int maxAmount, long timePosted) {
+        this.id = id;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.title = title;
+        this.description = description;
+        this.price = price;
+        this.maxAmount = maxAmount;
+        this.timePosted = timePosted;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public int getMaxAmount() {
+        return maxAmount;
+    }
+
+    public void setMaxAmount(int maxAmount) {
+        this.maxAmount = maxAmount;
+    }
+
+    public long getTimePosted() {
+        return timePosted;
+    }
+
+    public void setTimePosted(long timePosted) {
+        this.timePosted = timePosted;
     }
 
     public long getId() {

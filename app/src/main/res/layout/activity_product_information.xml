@@ -10,10 +10,24 @@
         android:id="@+id/product_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textStyle="bold|italic"
+        android:textSize="22sp"
         />
 
     <TextView
         android:id="@+id/product_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/product_price"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/product_amount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/product_postedDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>
