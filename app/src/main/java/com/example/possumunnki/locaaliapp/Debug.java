@@ -12,14 +12,28 @@ import android.widget.Toast;
  * @since 2017-05-12
  */
 public class Debug {
+    /**default debug level*/
     static int defaultLevel = 3;
+    /**debug level*/
     private static int DEBUG_LEVEL = defaultLevel;
+    /**message will be printed as toast*/
     private static final boolean UI = true;
+    /**message will be printed to console*/
     private static final boolean CONSOLE = false;
+    /**whether message will be printed as toast text or in console*/
     private static final boolean LOGGING = CONSOLE;
+    /**context where the messages will be printed*/
     private static Context context;
+    /**duration of the toast text*/
     private static int duration = Toast.LENGTH_SHORT;
 
+    /**
+     * Prints on logcat.
+     * @param className name of the class
+     * @param methodName name of the method
+     * @param message message
+     * @param level priority of the message
+     */
     public static void print(String className,
                              String methodName,
                              String message,
@@ -39,7 +53,10 @@ public class Debug {
 
     }
 
-    public static void loadDebug(Context host) {
+    /**
+     * Loads debug level from the xml-file
+     */
+    public static void loadDebug() {
         String debugLevelStr ="5";
         try {
             DEBUG_LEVEL = Integer.parseInt(debugLevelStr);
@@ -50,6 +67,10 @@ public class Debug {
         }
     }
 
+    /**
+     * Sets context
+     * @param c context
+     */
     public static void setContext(Context c) {
         context = c;
     }

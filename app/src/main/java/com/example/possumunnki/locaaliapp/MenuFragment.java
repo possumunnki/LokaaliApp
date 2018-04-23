@@ -7,15 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * The HelloWorld program implements an application that
- * simply displays "Hello World!" to the standard output.
+ * This is fragment of the menu bar.
  *
  * @author Akio Ide
  * @version 1.0
  * @since 2017-05-12
  */
 public class MenuFragment extends Fragment {
-    private final String TAG = "MapFragment";
+
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);

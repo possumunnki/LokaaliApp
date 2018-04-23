@@ -1,12 +1,9 @@
 package com.example.possumunnki.locaaliapp;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,9 +12,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,28 +36,39 @@ import java.net.URL;
 import java.util.ArrayList;
 
 /**
- * The HelloWorld program implements an application that
- * simply displays "Hello World!" to the standard output.
+ * This class Implements Google map.
  *
  * @author Akio Ide
- * @version 1.0
- * @since 2017-05-12
+ * @version 1.4
+ * @since 2018-23-04
  */
 
 public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCallback,
                     GoogleMap.OnMyLocationButtonClickListener,
                     GoogleMap.OnMyLocationClickListener,
                     GoogleMap.OnInfoWindowClickListener {
+    /**This is used for Debug.print to make easier to debug*/
     private final String TAG = "MainActivity";
+    /**Whether user has given permission of location or not*/
     private boolean locationPermission = false;
+    /**google map*/
     private GoogleMap mMap;
-    private Location currentLocation;
+    /**zoom button is able to add by using this*/
     private UiSettings mUIsettings;
+    /**longitude of post marker*/
     private double currentLongitude;
+    /**latitude of post marker*/
     private double currentLatitude;
 
+    /**data of product posts*/
     private static ArrayList<ProductPost> productPosts;
+    /**List of markers*/
     private ArrayList<Marker> markers;
+
+    /**User is able to add product posts by tapping this marker*/
+    private Marker postHere;
+
+    /**search box*/
     private EditText search;
 
     private final String URL = "https://lokaali.herokuapp.com/products";
@@ -72,32 +78,33 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
         setContentView(R.layout.activity_main);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
         markers = new ArrayList<>();
         productPosts = new ArrayList<>();
-        Long tsLong = System.currentTimeMillis()/1000;
-        String ts = tsLong.toString();
-        Debug.print(TAG, "onCreate", "" + ts, 1);
+        // asks permission of location
         askLocationPermission();
 
-        search = (EditText) findViewById(R.id.search);
-        search.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        if(locationPermission) {
+            search = (EditText) findViewById(R.id.search);
+            //do something when user modifies search box
+            search.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            }
+                }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterMarkers(s);
-                Debug.print(TAG, "onTextChanged", s.toString(), 2);
-            }
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    filterMarkers(s);
+                    Debug.print(TAG, "onTextChanged", s.toString(), 2);
+                }
 
-            @Override
-            public void afterTextChanged(Editable s) {
+                @Override
+                public void afterTextChanged(Editable s) {
 
-            }
-        });
-
+                }
+            });
+        }
     }
 
     @Override
@@ -107,22 +114,12 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
         if(postHere != null) {
             postHere.remove();
         }
-
     }
 
-    public void clicked(View v) {
-        switch (v.getId()) {
-            /*case R.id.newPost:
-                Debug.print(TAG, "clicked()", "post CLICK", 2);
-                Intent intent = new Intent(this, PostActivity.class);
-                intent.putExtra("currentLongitude", currentLongitude);
-                intent.putExtra("currentLatitude", currentLatitude);
-                startActivity(intent);
-                break;*/
-        }
-    }
-
-
+    /**
+     * Checks whether user has already given permission of location or not.
+     * If user hasn't, it asks permission of location by using dialog.
+     */
     public void askLocationPermission() {
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if(permissionCheck == PackageManager.PERMISSION_DENIED) {
@@ -138,12 +135,13 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
         if(requestCode == 1) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 locationPermission = true;
-
             }
         }
     }
 
-
+    /**
+     * Zooms map to Tampere.
+     */
     public void zoomToTampere() {
         double latTampere = 61.497752;
         double longTampere = 23.760954;
@@ -154,6 +152,12 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
+    /**
+     * Finds the markers that contains search characters
+     * and hides those that doesn't contain.
+     *
+     * @param filter search word
+     */
     public void filterMarkers(CharSequence filter) {
         //converts to lowercase
         String filterLow = filter.toString().toLowerCase();
@@ -167,10 +171,13 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
                 marker.setVisible(false);
             }
         }
-
     }
 
-
+    /**
+     * Draws product posts on google map.
+     *
+     * @param posts product post dates
+     */
     public void drawMarkers(ArrayList<ProductPost> posts) {
         //Debug.print(TAG, "drawMarkers", "" + posts.get(0).getTitle(), 2);
         for(int i = 0; i < posts.size(); i++) {
@@ -178,6 +185,10 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
+    /**
+     * Draws the marker on google map.
+     * @param post
+     */
     public void drawMarker(ProductPost post) {
         String title = post.getTitle();
         String description = post.getDescription();
@@ -198,10 +209,12 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
         post.setMarker(marker);
         markers.add(marker);
         marker.setTag(post);
-
-
     }
 
+    /**
+     * Draws post marker.
+     * @param gps
+     */
     public void drawPostPlaceMarker(LatLng gps) {
         postHere = mMap.addMarker(new MarkerOptions()
                 .position(gps)
@@ -212,42 +225,39 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
         postHere.showInfoWindow();
     }
 
-    private Marker postHere;
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        mMap.setMyLocationEnabled(true);
-        mMap.setOnMyLocationButtonClickListener(this);
-        mMap.setOnMyLocationClickListener(this);
-        mMap.setOnInfoWindowClickListener(this);
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                if(postHere != null) {
-                    postHere.remove();
+        if(locationPermission) {
+            mMap = googleMap;
+            mMap.setMyLocationEnabled(true);
+            mMap.setOnMyLocationButtonClickListener(this);
+            mMap.setOnMyLocationClickListener(this);
+            mMap.setOnInfoWindowClickListener(this);
+            mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    if(postHere != null) {
+                        postHere.remove();
+                    }
+                    currentLongitude = latLng.longitude;
+                    currentLatitude = latLng.latitude;
+                    drawPostPlaceMarker(latLng);
+
                 }
-                currentLongitude = latLng.longitude;
-                currentLatitude = latLng.latitude;
-                drawPostPlaceMarker(latLng);
+            });
 
-            }
-        });
+            mUIsettings = mMap.getUiSettings();
+            // enables zoom buttons
+            mUIsettings.setZoomControlsEnabled(true);
 
-        mUIsettings = mMap.getUiSettings();
-        // enables zoom buttons
-        mUIsettings.setZoomControlsEnabled(true);
-
-        new HttpGetAsyncTask().execute(URL);
-        zoomToTampere();
-        Debug.print(TAG, "onMapReady()", "WE are on map ready", 1);
+            new HttpGetAsyncTask().execute(URL);
+            zoomToTampere();
+            Debug.print(TAG, "onMapReady()", "WE are on map ready", 1);
+        }
     }
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        Toast.makeText(this, "Info window clicked",
-                Toast.LENGTH_SHORT).show();
-
         if(marker.getTag() != null) {
             if(marker.getTag().toString().equals("post")) {
                 Intent intent = new Intent(this, PostActivity.class);
@@ -267,20 +277,18 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
-
     @Override
     public void onMyLocationClick(@NonNull Location location) {
-
     }
 
     @Override
     public boolean onMyLocationButtonClick() {
-        //Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
         return false;
     }
 
-
-
+    /**
+     * This class fetches product post dates from the data base.
+     */
     public class HttpGetAsyncTask extends AsyncTask<String, JSONArray, String> {
         public final String REQUEST_METHOD = "GET";
         public final int READ_TIMEOUT = 15000;
@@ -326,14 +334,20 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
             return result;
         }
 
+        @Override
         protected void onProgressUpdate(JSONArray... jsonArrays) {
             convertToProductPosts(jsonArrays[0]);
         }
 
+        @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
         }
 
+        /**
+         * Converts jsonArray to ProductPosts.
+         * @param jsonArray json array which includes fetched data
+         */
         public void convertToProductPosts(JSONArray jsonArray) {
             ArrayList<ProductPost> posts = new ArrayList<>();
             try {
@@ -348,6 +362,7 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
                     long postedTime = jsonObject.getLong("timePosted");
                     double price = jsonObject.getDouble("price");
                     int amount = jsonObject.getInt("maxAmount");
+
                     posts.add(new ProductPost(id, title, description, latitude, longitude,postedTime, price, amount));
                     //Debug.print(TAG, "convertToProductPosts", "long" + longitude + " lat" + latitude, 2);
                 }
@@ -356,7 +371,6 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
             } catch (JSONException e) {
                 Debug.print(TAG, "convertToProductPosts", e.toString(), 1);
             }
-
         }
     }
 }

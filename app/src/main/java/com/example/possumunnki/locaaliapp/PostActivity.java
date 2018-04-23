@@ -19,14 +19,27 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * This class is activity.
+ * In this activity user is able to post products to the database.
+ *
+ * @author Akio Ide
+ * @version 1.0
+ * @since 2018-23-04
+ */
 public class PostActivity extends AppCompatActivity {
     private final String TAG = "PostActivity";
+    /**Edit text box where user inputs title of the product*/
     private EditText title;
+    /**Edit text box where user inputs description of the product*/
     private EditText description;
+    /**Edit text box where user inputs price of the product*/
     private EditText price;
+    /**Edit text box where user inputs amount of the product*/
     private EditText amount;
+    /**latitude where the post will be added*/
     private double latitude;
+    /**longitude where the post will be added*/
     private double longitude;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +50,7 @@ public class PostActivity extends AppCompatActivity {
         price = (EditText) findViewById(R.id.price);
         amount = (EditText) findViewById(R.id.amount);
 
+        // gets longitude and latitude from main activity
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             latitude = extras.getDouble("currentLatitude");
@@ -44,6 +58,10 @@ public class PostActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Called when user touches post button
+     * @param v view of the button
+     */
     public void clicked(View v) {
         switch (v.getId()) {
             case R.id.post:
@@ -55,6 +73,10 @@ public class PostActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Checks that user has inputted all boxes.
+     * @return whether inputs are correct or not.
+     */
     public boolean checkInputs() {
         boolean result = true;
 
@@ -74,7 +96,9 @@ public class PostActivity extends AppCompatActivity {
         return result;
     }
 
-
+    /**
+     * Posts product post to the database so that other users can see.
+     */
     public void postProduct() {
         Map<String,Object> map = new HashMap<>();
         map.put("longitude", longitude);
@@ -85,7 +109,6 @@ public class PostActivity extends AppCompatActivity {
         map.put("maxAmount", Integer.parseInt(amount.getText().toString()));
         map.put("timePosted", System.currentTimeMillis());
 
-
         Debug.print(TAG, "clicked", "longitude" + longitude + " latitude" + latitude, 2);
 
         HttpPostAsyncTask task = new HttpPostAsyncTask(map, this);
@@ -93,6 +116,9 @@ public class PostActivity extends AppCompatActivity {
         task.execute("https://lokaali.herokuapp.com/products");
     }
 
+    /**
+     * This class connects to database and posts product post.
+     */
     public class HttpPostAsyncTask extends AsyncTask<String, String, Void> {
         //JSON body of the post
         JSONObject data;
@@ -137,10 +163,16 @@ public class PostActivity extends AppCompatActivity {
             return null;
         }
 
+        @Override
         protected void onProgressUpdate(String... messages) {
             Toast.makeText(host, (messages[0]), Toast.LENGTH_SHORT).show();
         }
 
+        /**
+         * Posts the product post data to the database.
+         * @param urlConnection url connection
+         * @param data product post as JsonObject
+         */
         private void postData(HttpURLConnection urlConnection, JSONObject data) {
             try {
                 if (data != null) {

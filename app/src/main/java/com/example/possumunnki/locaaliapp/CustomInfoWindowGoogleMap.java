@@ -15,8 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * The HelloWorld program implements an application that
- * simply displays "Hello World!" to the standard output.
+ * This class implements custom info window of the google map marker.
  *
  * @author Akio Ide
  * @version 1.0
@@ -56,10 +55,6 @@ public class CustomInfoWindowGoogleMap implements GoogleMap.InfoWindowAdapter {
             Date date = new Date(postTime);
             postedDate.setText(simpleDateFormat.format(date));
         }
-
-
-
-
         return view;
     }
 }
