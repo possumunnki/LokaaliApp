@@ -1,7 +1,7 @@
 ----------------------------------------------------------------
-Sun Apr 22 03:58:52 EEST 2018:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.1.0 - (1808820): instance a816c00e-0162-eadc-58de-00000dde9000 
-on database directory memory:C:\Projects\lukuvuosi2017\mobiiliohjelmointi\Harkkatyo\code\LokaaliBackend\testdb with class loader java.net.URLClassLoader@d2adbe 
+Mon Apr 23 19:05:06 EEST 2018:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.1.0 - (1808820): instance a816c00e-0162-f340-630e-00000d5721a8 
+on database directory memory:C:\Projects\lukuvuosi2017\mobiiliohjelmointi\Harkkatyo\code\LokaaliBackend\testdb with class loader sun.misc.Launcher$AppClassLoader@119d7047 
 Loaded from file:/C:/Users/possumunnki/.m2/repository/org/apache/derby/derby/10.14.1.0/derby-10.14.1.0.jar
 java.vendor=Oracle Corporation
 java.runtime.version=1.8.0_111-b14

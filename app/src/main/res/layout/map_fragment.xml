@@ -5,8 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
+    <fragment
+        android:id="@+id/menu_fragment"
+        android:name="com.example.possumunnki.locaaliapp.MenuFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="This is MapFragment"/>
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:id="@+id/map"
+        tools:context=".MainActivity"
+        android:name="com.google.android.gms.maps.SupportMapFragment" />
 </LinearLayout>

@@ -1,12 +1,18 @@
 package fi.lokaali.LokaaliBackend;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * Created by possumunnki on 1.4.2018.
@@ -14,6 +20,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 public class LokaaliRestController {
+
+
     @Autowired
     ProductPostRepository productPostRepository;
 

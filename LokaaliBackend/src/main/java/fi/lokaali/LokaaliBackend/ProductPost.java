@@ -9,17 +9,15 @@ import javax.persistence.*;
 @Table(name = "products")
 public class ProductPost {
     @Id @GeneratedValue
+    @Column(name = "id")
     private long id;
-
     private double latitude;
     private double longitude;
-
     private String title;
     private String description;
-    //!!!!uuutta
+
     private double price;
     private int maxAmount;
-
     private long timePosted;
 
     public ProductPost() {
@@ -33,8 +31,7 @@ public class ProductPost {
         this.description = description;
     }
 
-    public ProductPost(long id, double latitude, double longitude, String title, String description, long timePosted) {
-        this.id = id;
+    public ProductPost(double latitude, double longitude, String title, String description, long timePosted) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.title = title;
@@ -42,8 +39,7 @@ public class ProductPost {
         this.timePosted = timePosted;
     }
 
-    public ProductPost(long id, double latitude, double longitude, String title, String description, double price, int maxAmount, long timePosted) {
-        this.id = id;
+    public ProductPost(double latitude, double longitude, String title, String description, double price, int maxAmount, long timePosted) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.title = title;

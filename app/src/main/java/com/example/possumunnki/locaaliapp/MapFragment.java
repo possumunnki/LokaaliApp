@@ -1,6 +1,5 @@
 package com.example.possumunnki.locaaliapp;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,8 +13,9 @@ import android.view.ViewGroup;
  * @version 1.0
  * @since 2017-05-12
  */
-public class MapFragment extends Fragment {
+public class MapFragment extends android.support.v4.app.Fragment {
     private final String TAG = "MapFragment";
+
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
