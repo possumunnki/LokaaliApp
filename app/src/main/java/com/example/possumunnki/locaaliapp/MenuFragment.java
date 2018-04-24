@@ -11,7 +11,7 @@ import android.view.ViewGroup;
  *
  * @author Akio Ide
  * @version 1.0
- * @since 2017-05-12
+ * @since 2018-04-24
  */
 public class MenuFragment extends Fragment {
 

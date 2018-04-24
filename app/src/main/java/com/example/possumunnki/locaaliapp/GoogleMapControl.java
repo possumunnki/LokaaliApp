@@ -36,11 +36,12 @@ import java.net.URL;
 import java.util.ArrayList;
 
 /**
- * This class Implements Google map.
+ * This class Implements Google map and that relates on google map
+ * such as markers and actions.
  *
  * @author Akio Ide
- * @version 1.4
- * @since 2018-23-04
+ * @version 1.0
+ * @since 2018-04-24
  */
 
 public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCallback,
@@ -71,6 +72,7 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
     /**search box*/
     private EditText search;
 
+    /**backend url*/
     private final String URL = "https://lokaali.herokuapp.com/products";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -213,7 +215,7 @@ public class GoogleMapControl extends AppCompatActivity implements OnMapReadyCal
 
     /**
      * Draws post marker.
-     * @param gps
+     * @param gps position of post marker
      */
     public void drawPostPlaceMarker(LatLng gps) {
         postHere = mMap.addMarker(new MarkerOptions()

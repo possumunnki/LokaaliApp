@@ -7,7 +7,7 @@ import com.google.android.gms.maps.model.Marker;
  *
  * @author Akio Ide
  * @version 1.0
- * @since 2017-05-12
+ * @since 2018-04-24
  */
 public class ProductPost {
     /**id of the post*/
